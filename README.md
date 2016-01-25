@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # WeChat Collector(微信文章采集)
 Tencent WeChat public platform article collector. 微信文章采集，微信公众号采集，自动采集。
 
@@ -69,8 +68,3 @@ Tencent WeChat public platform article collector. WeChat article collected, all 
 ## Upgrade Notice
 
 ### 1.0 
-=======
-~Current Version:1.1~
-# wxcaiji_i3geek
-wordpress插件，微信文章采集，微信公众号（服务号）全部历史文章采集，自动采集。
->>>>>>> aaf2879db8bad5584ac95d3e1456bc591b252101
