@@ -1,37 +1,43 @@
 <?php
+define("I3GEEK_READING_ROOT",ABSPATH."reading/");
+define("I3GEEK_READING_PLUGIN_ROOT",WP_PLUGIN_DIR."/wxcaiji_i3geek/");
 
-	error_reporting(1);
-	require_once "Snoopy.class.php"; 
-	require_once "simple_html_dom.php"; 
-	require_once 'fileutil.php'; 
-	define("READING_ROOT",ABSPATH."reading/");
-	define("READING_PLUGIN_ROOT",ABSPATH."wp-content/plugins/wxcaiji_i3geek/");
+if(!class_exists('Snoopy')){
+	require_once("Snoopy.class.php"); 
+}
+if(!class_exists('simple_html_dom_node')){
+	require_once("simple_html_dom.php"); 
+}
+if(!class_exists('FileUtil')){
+	require_once('fileutil.php'); 
+}
+class wxcaiji_i3geek_function{
 
 	//复制内容
-	function reading_root_init(){
-		if(is_dir(READING_ROOT."css/") && file_exists(READING_ROOT."qrcode"))
+	public static function reading_root_init(){
+		if(is_dir(I3GEEK_READING_ROOT."css/") && file_exists(I3GEEK_READING_ROOT."qrcode"))
 		{
 			//完成，没问题
 		}
 		else
 		{
-			FileUtil::copyDir(READING_PLUGIN_ROOT."reading/css",READING_ROOT."css",true);
-			FileUtil::copyFile(READING_PLUGIN_ROOT."reading/qrcode",READING_ROOT."qrcode",true);
+
+			FileUtil::copyDir(I3GEEK_READING_PLUGIN_ROOT."reading/css",I3GEEK_READING_ROOT."css",true);
+			FileUtil::copyFile(I3GEEK_READING_PLUGIN_ROOT."reading/qrcode",I3GEEK_READING_ROOT."qrcode",true);
 		}
 	}
 	//判断入口
-	function readingroot_isWritable(){
-		if (is_writable(READING_ROOT) )
+	public static function readingroot_isWritable(){
+		if (is_writable(I3GEEK_READING_ROOT) )
 			{
-				reading_root_init();
+				wxcaiji_i3geek_function::reading_root_init();
 				return true;
 			}
 		else
 			return false;
 	}
-	//down2file(url,READING_ROOT)
 	function down2file($url,$site_url){
-		$_path = READING_ROOT;
+		$_path = I3GEEK_READING_ROOT;
 		$snoopy = new Snoopy;
 		// $url = "http://mp.weixin.qq.com/s?__biz=MjM5MTQ2MjA3Ng==&mid=404586426&idx=1&sn=4c9d30cc097f4f5dffb94e4918e53749#rd";
 		$snoopy->fetch($url); //获取所有内容
@@ -45,16 +51,16 @@
 		$content = $myhtml->find ('div.rich_media_content',0 )->innertext; 
 		$myhtml = str_get_html($content);//显示内容
 		$ret = $myhtml->find('img');
-		$img_array = downloadImg($ret,$timestamp,$_path);
+		$img_array = $this->downloadImg($ret,$timestamp,$_path);
 
 		//保存页面
-		$result_url = wirteHTML($timestamp,$title,$time,$myhtml,$_path);
+		$result_url = $this->wirteHTML($timestamp,$title,$time,$myhtml,$_path);
 		return $site_url .'reading/' . $result_url;
 	}
 	function down2blog($url,$site_url){
 		if(!function_exists('is_user_logged_in'))   
 			require (ABSPATH . WPINC . '/pluggable.php');
-		$_path = READING_ROOT;
+		$_path = I3GEEK_READING_ROOT;
 		$snoopy = new Snoopy;
 		$snoopy->fetch($url); //获取所有内容
 		$timestamp = time();
@@ -65,9 +71,9 @@
 		$content = $myhtml->find ('div.rich_media_content',0 )->innertext; 
 		$myhtml = str_get_html($content);//显示内容
 		$ret = $myhtml->find('img');
-		$img_array = downloadImg2Blog($ret,$timestamp,$_path,$site_url);
+		$img_array = $this->downloadImg2Blog($ret,$timestamp,$_path,$site_url);
 		$myhtml = str_replace("<br />", "", $myhtml);
-
+		$myhtml = $myhtml . '<p style="text-align: right;"><em>--by <a href="http://www.i3geek.com" target="_blank">i3geek</a></em></p>';
 		$my_post = array(
 			'post_title' => $title,
 			'post_content' => $myhtml,
@@ -110,7 +116,7 @@
 			$img_src = $_src->getAttribute('data-src');
 			$img_type = $_src->getAttribute('data-type');	
 			$path = $path_file . '/' . $k . '.' . $img_type;
-			saveImgURL($img_src,$path);
+			$this->saveImgURL($img_src,$path);
 			$_src->removeAttribute('data-src');
 			$_src->removeAttribute('data-type');
 			$_src->removeAttribute('data-ratio');
@@ -130,7 +136,7 @@
 			$img_src = $_src->getAttribute('data-src');
 			$img_type = $_src->getAttribute('data-type');	
 			$path = $path_file . '/' . $k . '.' . $img_type;
-			saveImgURL($img_src,$path);
+			$this->saveImgURL($img_src,$path);
 			$_src->removeAttribute('data-src');
 			$_src->removeAttribute('data-type');
 			$_src->removeAttribute('data-ratio');
@@ -149,7 +155,7 @@
         return $flag;
 	}
 
-	function getNoticeMsg(){
+	public static function getNoticeMsg(){
 		$handle = fopen("http://wx.i3geek.com/notice.php","rb");
 		if($handle == '')
 			return "请更新至最新版，或请关注 <a href=\"http://www.i3geek.com\" target=\"_blank\">论坛</a>";
@@ -164,4 +170,5 @@
 			return $content->{'msg'};
 		}
 	}
+}
 ?>

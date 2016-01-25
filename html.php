@@ -1,21 +1,26 @@
 <?php
 
-
-
+  $pageMax=10;
+  $table_page = 1;
+  if(!empty($_GET['table_page']))
+    $table_page = $_GET['table_page'];
+  $total_page = wxcaiji_i3geek_queryCount($pageMax);
+  if($table_page < 2) $table_page = 1;
+  if($table_page > $total_page) $table_page = $total_page;
+  wp_enqueue_script('jquery');
+  wp_enqueue_script( 'wxcaiji-i3geek-script' );
 ?>
-<script type="text/javascript" src="<?php echo network_site_url( '/' )."wp-content/plugins/wxcaiji_i3geek/"."wx.js"; ?>"></script>
-<script src="http://code.jquery.com/jquery-latest.js"></script>
 <div>  
     <h2>微信文章采集设置</h2>  
-		<?php if(!readingroot_isWritable()){ ?>
+		<?php if(!wxcaiji_i3geek_function::readingroot_isWritable()){ ?>
           <div id="message" class="updated" style="border-left-color: #d54e21;background: #fef7f1;">
             <p>目录没有写权限！请设置根目录权限777，或根目录创建文件夹reading并设置目录权限777 <a href="http://www.i3geek.com" target="_blank">查看帮助</a></p>
           </div>
     <?php } ?>
 
-    <?php if(getNoticeMsg()!=-1){ ?>
+    <?php if(wxcaiji_i3geek_function::getNoticeMsg()!=-1){ ?>
           <div id="notice_msg" class="updated" style="border-left-color: #00a0d2;background: #f7fcfe;">
-            <p><strong>公告</strong>： <?php echo getNoticeMsg(); ?></p>
+            <p><strong>公告</strong>： <?php echo wxcaiji_i3geek_function::getNoticeMsg(); ?></p>
           </div>
     <?php } ?>
          <!-- Nav tabs -->
@@ -69,6 +74,7 @@
                 <tr>
                   <th scope="row">
                     <input type="hidden" name="action" value="wxcaiji_i3geek_insert" /> 
+                    <?php wp_nonce_field( 'wxcaiji-i3geek-post' ); ?>
                     <input type="submit" value="采集" class="button-primary" />
                     <img src="<?php echo network_site_url( '/' )."wp-content/plugins/wxcaiji_i3geek/"."loading.gif"; ?>"  style="display:none;"/>
                   </th>
@@ -118,7 +124,7 @@
             <form action method="post"> 
               <div id="cj_rt_message" class="updated" style="border-left-color: #d54e21;background: #fef7f1;display:none;"></div>
               <table id="json_table" border="1px" style="width: 90%; display:none;"></table>
-              <div id="bt_caiji" style="display:none;" ><input type="hidden" name="action" value="wxcaiji_i3geek_caiji" /><p>采集类型： <input type="radio" name="article_type" value="blog" checked/>新文章 <input type="radio" name="article_type" value="wx" />原微信样式 <input type="submit" value="批量采集" class="button-primary" /></p></div>
+              <div id="bt_caiji" style="display:none;" ><input type="hidden" name="action" value="wxcaiji_i3geek_caiji" /><?php wp_nonce_field( 'wxcaiji-i3geek-post' ); ?><p>采集类型： <input type="radio" name="article_type" value="blog" checked/>新文章 <input type="radio" name="article_type" value="wx" />原微信样式 <input type="submit" value="批量采集" class="button-primary" /></p></div>
 
             </form>
         </div>
@@ -132,7 +138,7 @@
             $results=wxcaiji_i3geek_queryDisplay($table_page,$pageMax);
 					  $i=0;
             while ($i< count($results)){
-              echo "<tr><td>".$results[$i]->id."</td><td>".$results[$i]->name."</td><td>".$results[$i]->link."</td></tr>";
+              echo "<tr><td>".$results[$i]->id."</td><td>".esc_html($results[$i]->name)."</td><td>".esc_url($results[$i]->link)."</td></tr>";
               $i++;
             }
           ?>
@@ -161,46 +167,45 @@
 
     <hr>
     <div style='text-align:center;'>
-      <a href="http://www.i3geek.com" target="_blank">插件主页</a> | <a href="http://bbs.i3geek.com" target="_blank">插件论坛</a> | <a href="mailto:yan@i3geek.com" target="_blank">联系作者</a> | <a href="http://www.i3geek.com" target="_blank">作者主页</a> | <a href="http://bbs.i3geek.com" target="_blank">意见反馈</a>
-      <br>Copyright © 2016 by <a href="http://www.i3geek.com" target="_blank">i3geek.com</a>. All rights reserved. QQ群：194895016
+      <a href="http://www.i3geek.com/archives/997" target="_blank">插件主页</a> | <a href="http://bbs.i3geek.com" target="_blank">插件论坛</a> | <a href="mailto:yan@i3geek.com" target="_blank">联系作者</a> | <a href="http://www.i3geek.com" target="_blank">作者主页</a> | <a href="http://bbs.i3geek.com" target="_blank">意见反馈</a> | <a href="http://www.i3geek.com" target="_blank">i3geek.com</a> | QQ群：194895016
     </div>
 </div>  
 
 
 <script type='text/javascript'>
-  jQuery(function($){
-    if($('div.div-tab').length){
+  jQuery(function(jQuery){
+    if(jQuery('div.div-tab').length){
       var current_tab = '';
 
-      if($('#current_tab').length){ // 如果是设置页面，获取当前的 current_tab 的值
-        current_tab = $('#current_tab').first().val();
+      if(jQuery('#current_tab').length){ // 如果是设置页面，获取当前的 current_tab 的值
+        current_tab = jQuery('#current_tab').first().val();
       }
       
       if(current_tab == ''){ //设置第一个为当前 tab显示
-        current_tab = $('div.div-tab').first()[0].id.replace('tab-','');
+        current_tab = jQuery('div.div-tab').first()[0].id.replace('tab-','');
       }
 
-      var htitle    = $('#tab-title-'+current_tab).parent()[0].tagName;
+      var htitle    = jQuery('#tab-title-'+current_tab).parent()[0].tagName;
 
-      $('div.div-tab').hide();
+      jQuery('div.div-tab').hide();
 
-      $('#tab-title-'+current_tab).addClass('nav-tab-active');
-      $('#tab-'+current_tab).show();
-      $('#current_tab').val(current_tab);
+      jQuery('#tab-title-'+current_tab).addClass('nav-tab-active');
+      jQuery('#tab-'+current_tab).show();
+      jQuery('#current_tab').val(current_tab);
 
-      $(htitle+' a.nav-tab').on('click',function(){
+      jQuery(htitle+' a.nav-tab').on('click',function(){
 
         var prev_tab  = current_tab;
-        current_tab   = $(this)[0].id.replace('tab-title-','');
+        current_tab   = jQuery(this)[0].id.replace('tab-title-','');
 
-        $('#tab-title-'+prev_tab).removeClass('nav-tab-active');
-        $(this).addClass('nav-tab-active');
+        jQuery('#tab-title-'+prev_tab).removeClass('nav-tab-active');
+        jQuery(this).addClass('nav-tab-active');
 
-        $('#tab-'+prev_tab).hide();
-        $('#tab-'+current_tab).show();
+        jQuery('#tab-'+prev_tab).hide();
+        jQuery('#tab-'+current_tab).show();
         
-        if($('#current_tab').length){
-          $('#current_tab').val(current_tab);
+        if(jQuery('#current_tab').length){
+          jQuery('#current_tab').val(current_tab);
         }
       });
     }

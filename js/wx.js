@@ -1,31 +1,31 @@
 var json;
 function get_wx_list()
 {
-	var tips = $("#cj_rt_message");
-	if($("#weixin").val() == '' || $("#key").val()=='')
+	var tips = jQuery("#cj_rt_message");
+	if(jQuery("#weixin").val() == '' || jQuery("#key").val()=='')
 	{
 		var error_content = "请输入微信号或KEY";
 		tips.html("<p>"+error_content+"</p>");
 		tips.show();
 		return;
 	}
-	$.ajax({
+	jQuery.ajax({
 		type:"POST",
 		url: "http://wx.i3geek.com/weixin.php",
-		data:{weixin:$("#weixin").val(),key:$("#key").val()},
+		data:{weixin:jQuery("#weixin").val(),key:jQuery("#key").val()},
 		dataType:"jsonp",
 		jsonp: "callback",
 		jsonpCallback:"success_jsonpCallback",
 		beforeSend:function(){
-			$("#json_table").hide();
-			$("#bt_caiji").hide();
+			jQuery("#json_table").hide();
+			jQuery("#bt_caiji").hide();
 			tips.hide();
-			$("#button_caiji").attr('disabled','');
-			$("#loading_button_caiji").show();
+			jQuery("#button_caiji").attr('disabled','');
+			jQuery("#loading_button_caiji").show();
 		},
 		complete:function(){
-			$("#button_caiji").removeAttr('disabled');
-			$("#loading_button_caiji").hide();
+			jQuery("#button_caiji").removeAttr('disabled');
+			jQuery("#loading_button_caiji").hide();
 		},
 		success: function(msg){
 			var code = msg.code;
@@ -68,14 +68,14 @@ function json2table()
 		html_content = html_content + "<tbody>";
 		var json_array = JSON.parse(json);
 		var content = json_array.content;
-		$.each(content, function(index, item) {
+		jQuery.each(content, function(index, item) {
 			html_content = html_content + "<tr><th>"+ "<input name=\"caiji[]\" type=\"checkbox\" value=\"" +item.title +'|y&'+ item.link+"\" />" +"</th><td>"+item.title+"</td><td style=\"word-break: break-all;\"><samp>"+item.link+"</samp></td></tr>";
 		});
 		html_content = html_content + "</tbody>";
 	}
-	$("#json_table").html(html_content);
-	$("#json_table").show();
-	$("#bt_caiji").show();
+	jQuery("#json_table").html(html_content);
+	jQuery("#json_table").show();
+	jQuery("#bt_caiji").show();
 }
 
  function CheckSelect(thisform)  
