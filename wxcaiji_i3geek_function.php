@@ -1,6 +1,7 @@
 <?php
 define("I3GEEK_READING_ROOT",ABSPATH."reading/");
 define("I3GEEK_READING_PLUGIN_ROOT",WP_PLUGIN_DIR."/wxcaiji_i3geek/");
+ini_set('max_execution_time', '100');
 
 if(!class_exists('Snoopy')){
 	require_once("Snoopy.class.php"); 

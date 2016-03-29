@@ -58,6 +58,9 @@ Tencent WeChat public platform article collector. WeChat article collected, all 
 
 ## Changelog
 
+### 1.1
+修改由于超时导致的错误
+
 ### 1.0
 * 增加文章采集功能
 * 增加采集类型
@@ -67,4 +70,4 @@ Tencent WeChat public platform article collector. WeChat article collected, all 
 
 ## Upgrade Notice
 
-### 1.0 
+### 1.1 
